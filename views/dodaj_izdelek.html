@@ -1,0 +1,25 @@
+%rebase('osnova.html', naslov='Dodajanje izdelka')
+
+
+
+  <form action="{{url('dodaj_izdelek')}}" method="POST", style="width: 60%; margin-left: 5%;">
+    <div class="form-group">
+        <label for="exampleInputEmail1">Kategorija</label>
+        <input class="form-control" type="text" name="kategorija" value="{{izdelek.izdelek_ime}}">      
+     </div>
+    <div class="form-group">
+        <label for="exampleInputEmail1">Ime</label>
+        <input class="form-control" type="text" name="kategorija" value="{{izdelek.izdelek_oznaka}}">      
+    </div>
+    <div class="form-group">
+        <label for="exampleInputEmail1">Leto</label>
+        <input class="form-control" type="number" name="leto" value="{{izdelek.leto}}">      
+    </div>
+    <div class="form-group">
+        <label for="exampleInputEmail1">Cena</label>
+        <input class="form-control" type="number" name="cena" value="{{izdelek.cena}}">      
+    </div>
+   
+    
+    <button type="submit" class="btn btn-primary">Dodaj</button>
+  </form>

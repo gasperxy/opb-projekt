@@ -3,7 +3,7 @@ import psycopg2, psycopg2.extensions, psycopg2.extras
 psycopg2.extensions.register_type(psycopg2.extensions.UNICODE) # se znebimo problemov s šumniki
 
 from typing import List
-from Modeli.Izdelki import *
+from Data.Modeli import *
 
 import Data.auth_public as auth
 from datetime import date
@@ -15,6 +15,7 @@ class Repo:
         self.conn = psycopg2.connect(database=auth.db, host=auth.host, user=auth.user, password=auth.password, port=5432)
         self.cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
+
     def Izdelki(self) -> List[IzdelekDto]: 
         izdelki = self.cur.execute(
             """
@@ -25,6 +26,8 @@ class Repo:
         return [IzdelekDto(id, ime, oznaka) for (id, ime, oznaka) in izdelki]
     
     def cena_izdelkov(self) -> List[CenaIzdelkaDto]:
+
+        
         self.cur.execute(
             """
             select c.id, i.id as izdelek_id, i.ime, k.oznaka, c.leto, c.cena from cenaizdelka c
@@ -86,6 +89,7 @@ class Repo:
           """, (kategorija.oznaka,))
         
         row = self.cur.fetchone()
+        
         if row:
             kategorija.id = row[0]
             return kategorija

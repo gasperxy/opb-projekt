@@ -1,5 +1,10 @@
 from dataclasses import dataclass, field
 
+# Predlagam uporabo (vsaj) dataclass-ov
+
+# Nahitro dataclass doda nekaj bližnjic za delo z razredi in omogoča tudi nekaj bolj naprednih funkcij,
+# ki jih načeloma najdemo v bolj tipiziranih jezik kot so C#, Java, C++,..
+
 @dataclass
 class Izdelek:
     id: int = field(default=0)

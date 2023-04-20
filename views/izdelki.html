@@ -1,0 +1,33 @@
+%rebase('osnova.html', naslov='Cene Izdelkov')
+<script src="{{url('static', filename='izdelki.js')}}"></script>
+<div style="width: 85%; margin-left: 5%; margin-right: 5%;">
+    <a  href="{{url('dodaj_izdelek')}}" class="button">
+        Dodaj nov izdelek
+    </a>
+      <br>
+
+    </br>
+    <table  id="izdelki" class="display compact table-striped table-bordered">
+        <thead>
+            <tr>
+                <th>Kategorija</th>
+                <th>Izdelek</th>
+                <th>Leto</th>
+                <th>Cena</th>  
+             </tr>
+        </thead>
+     
+      %for izdelek in izdelki:
+        <tr>
+           <td>{{izdelek.izdelek_ime}}</td>
+           <td>{{izdelek.izdelek_oznaka}}</td>
+           <td>{{izdelek.leto}}</td>
+           <td>{{izdelek.cena}}</td>
+     
+        </tr>
+      %end
+      </table>
+</div>
+  
+
+  

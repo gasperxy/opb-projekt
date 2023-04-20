@@ -1,7 +1,7 @@
 import pandas as pd
 
 from Data.Database import Repo
-from Modeli.Izdelki import *
+from Data.Modeli import *
 
 repo = Repo()
 
@@ -45,9 +45,11 @@ def uvozi_cene(pot):
 
         else:
             # Vrstica je kategorija
+            
+
             kategorija = repo.dodaj_kategorijo(
                 KategorijaIzdelka( 
-                oznaka=" ".join(row[1].split(" ")[1:]))
+                    oznaka= " ".join(row[1].split(" ")[1:]))
             )
 
 
