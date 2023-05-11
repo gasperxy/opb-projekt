@@ -1,13 +1,16 @@
-%rebase('osnova.html', naslov='Cene Izdelkov')
-<script src="{{url('static', filename='izdelki.js')}}"></script>
+%rebase('osnova.html', naslov='Cene izdelkov po kategorijah in letih', stran='izdelki')
+
 <div style="width: 85%; margin-left: 5%; margin-right: 5%;">
-    <a  href="{{url('dodaj_izdelek')}}" class="button">
-        Dodaj nov izdelek
+
+    <a  href="{{url('dodaj_izdelek')}}" class="btn btn-light">
+       Dodaj nov izdelek
     </a>
       <br>
 
+     
+
     </br>
-    <table  id="izdelki" class="display compact table-striped table-bordered">
+    <table  id="izdelki" class="table table-bordered">
         <thead>
             <tr>
                 <th>Kategorija</th>
@@ -27,6 +30,13 @@
         </tr>
       %end
       </table>
+
+      <nav aria-label="Page navigation example">
+        <ul class="pagination">
+          <li class="page-item"><a class="page-link" href="#">Previous</a></li>
+          <li class="page-item"><a class="page-link" href="{{url('izdelki', skip=skip+take, take = take)}}">Next</a></li>
+        </ul>
+      </nav>
 </div>
   
 

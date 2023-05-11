@@ -1,0 +1,20 @@
+%rebase('osnova.html', naslov='Dodajanje kategorije', stran='kategorije')
+
+    % if rola == 'admin':
+    <form action="{{url('dodaj_kategorijo')}}" method="POST", style="width: 60%; margin-left: 5%;">
+        <div class="form-group">
+            <label for="exampleInputEmail1">Kategorija</label>
+            <input class="form-control" type="text" name="kategorija" value="{{kategorija.oznaka}}">     
+            
+         </div>
+       
+        
+        <button type="submit" class="btn btn-light">Dodaj</button>
+      </form>
+      
+      %else:
+      <p> Nimaš dovoljenja za ogled te strani!</p>
+
+    %end
+
+ 

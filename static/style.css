@@ -5,3 +5,10 @@
 div.container {
     width: 80%;
 }
+
+
+th {
+    position: sticky;
+    top: 50px;
+    background: white;
+  }

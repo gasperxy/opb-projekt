@@ -1,15 +1,22 @@
-%rebase('osnova.html', naslov='Dodajanje izdelka')
+%rebase('osnova.html', naslov='Dodajanje izdelka', stran='izdelki')
 
 
 
   <form action="{{url('dodaj_izdelek')}}" method="POST", style="width: 60%; margin-left: 5%;">
     <div class="form-group">
         <label for="exampleInputEmail1">Kategorija</label>
-        <input class="form-control" type="text" name="kategorija" value="{{izdelek.izdelek_ime}}">      
+        <!-- <input class="form-control" type="text" name="kategorija" value="{{izdelek.izdelek_ime}}">      -->
+        <select class="custom-select" name="kategorija">
+            <option value="0" selected>Izberi Kategorijo</option>
+            % for kategorija in kategorije:
+            <option value="{{kategorija.id}}">{{kategorija.oznaka}}</option>
+            %end
+            
+          </select> 
      </div>
     <div class="form-group">
         <label for="exampleInputEmail1">Ime</label>
-        <input class="form-control" type="text" name="kategorija" value="{{izdelek.izdelek_oznaka}}">      
+        <input class="form-control" type="text" name="ime" value="{{izdelek.izdelek_oznaka}}">      
     </div>
     <div class="form-group">
         <label for="exampleInputEmail1">Leto</label>
@@ -17,9 +24,9 @@
     </div>
     <div class="form-group">
         <label for="exampleInputEmail1">Cena</label>
-        <input class="form-control" type="number" name="cena" value="{{izdelek.cena}}">      
+        <input class="form-control" type="number" name="cena" step="0.01" value="{{izdelek.cena}}">      
     </div>
    
     
-    <button type="submit" class="btn btn-primary">Dodaj</button>
+    <button type="submit" class="btn btn-light">Dodaj</button>
   </form>

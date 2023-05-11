@@ -2,7 +2,7 @@
 import psycopg2, psycopg2.extensions, psycopg2.extras
 psycopg2.extensions.register_type(psycopg2.extensions.UNICODE) # se znebimo problemov s šumniki
 
-from typing import List, TypeVar, Type, Callable
+from typing import List, TypeVar, Type, Callable, Any
 from Data.Modeli import *
 from pandas import DataFrame
 from re import sub
@@ -14,11 +14,15 @@ import dataclasses
 # Ustvarimo generično TypeVar spremenljivko. Dovolimo le naše entitene, ki jih imamo tudi v bazi
 # kot njene vrednosti. Ko dodamo novo entiteno, jo moramo dodati tudi v to spremenljivko.
 
+
+
+
 T = TypeVar(
     "T",
     Izdelek,
     KategorijaIzdelka,
-    CenaIzdelka
+    CenaIzdelka,
+    Uporabnik
     )
 
 class Repo:
@@ -41,7 +45,7 @@ class Repo:
         self.cur.execute(sql_cmd)
         return [typ.from_dict(d) for d in self.cur.fetchall()]
     
-    def dobi_gen_id(self, typ: Type[T], id: int, id_col = "id") -> T:
+    def dobi_gen_id(self, typ: Type[T], id: int | str, id_col = "id") -> T:
         """
         Generična metoda, ki vrne dataclass objekt pridobljen iz baze na podlagi njegovega idja.
         """
@@ -275,19 +279,38 @@ class Repo:
 
         return [IzdelekDto(id, ime, oznaka) for (id, ime, oznaka) in izdelki]
     
-    def cena_izdelkov(self) -> List[CenaIzdelkaDto]:
+    def cena_izdelkov(self, skip: int = 0, take: int = 10) -> List[CenaIzdelkaDto]:
 
         
         self.cur.execute(
-            """
+            f"""
             select c.id, i.id as izdelek_id, i.ime, k.oznaka, c.leto, c.cena from cenaizdelka c
                 left join izdelek i on i.id = c.izdelek_id
-                left join kategorijaizdelka k on k.id = i.kategorija;
+                left join kategorijaizdelka k on k.id = i.kategorija
+
+            limit {take}
+            offset {skip};
+           
              """
         )
 
         return [CenaIzdelkaDto(id, izdelek_id, ime, oznaka, leto, cena) for (id, izdelek_id, ime, oznaka, leto, cena) in self.cur.fetchall()]
     
+    def kategorije_izdelkov(self, skip:int = 0, take: int = 10) -> List[KategorijaIzdelkaDto]:
+        self.cur.execute(
+            f"""
+            select c.id, max(c.oznaka) as oznaka, count(i.ime) as st_izdelkov from kategorijaIzdelka c
+                left join izdelek i on i.kategorija = c.id
+                group by c.id
+
+            limit {take}
+            offset {skip};
+           
+             """
+        )
+
+        return [KategorijaIzdelkaDto(id, oznaka, st_izdelkov) for (id, oznaka, st_izdelkov) in self.cur.fetchall()]
+
     def dobi_izdelek(self, ime_izdelka: str) -> Izdelek:
         # Preverimo, če izdelek že obstaja
         self.cur.execute("""
@@ -331,7 +354,8 @@ class Repo:
 
     def dodaj_kategorijo(self, kategorija: KategorijaIzdelka) -> KategorijaIzdelka:
 
-
+        
+        
         # Preverimo, če določena kategorija že obstaja
         self.cur.execute("""
             SELECT id from KategorijaIzdelka

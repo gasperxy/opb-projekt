@@ -3,6 +3,7 @@ from pandas import DataFrame
 
 from Data.Database import Repo
 from Data.Modeli import *
+from Data.Services import AuthService
 from typing import Dict
 from re import sub
 import dataclasses
@@ -10,6 +11,7 @@ import dataclasses
 
 # Vse kar delamo z bazo se nahaja v razredu Repo.
 repo = Repo()
+auth = AuthService(repo)
 
 
 
@@ -105,6 +107,13 @@ pot = "Data/cene.csv"
 # predhodno še ustvari, če ne obstaja.
 
 # uvozi_csv(pot, "NovaTabela")
+
+# primer ročnega dodajanja uporabnikov
+
+uporabnik1 = auth.dodaj_uporabnika("gasper", "user", "gasper")
+
+uporabnik = auth.dodaj_uporabnika("admin", "admin", "admin")
+
 
 
 

@@ -1,0 +1,38 @@
+%rebase('osnova.html', naslov='Kategorije izdelkov', stran='kategorije')
+
+<div style="width: 85%; margin-left: 5%; margin-right: 5%;" >
+
+      % if rola == 'admin':
+        <a  href="{{url('dodaj_kategorijo')}}" class="btn btn-light">
+          Dodaj novo kategorijo
+      </a>
+        <br>
+      %end
+
+    </br>
+    <div style="height: 500px; overflow: auto;" >
+        <table  id="kategorije" class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Kategorija</th>
+                    <th>Število izdelkov</th>
+                 </tr>
+            </thead>
+         
+          %for kategorija in kategorije:
+            <tr>
+               <td>{{kategorija.oznaka}}</td>
+               <td>{{kategorija.st_izdelkov}}</td>
+               
+         
+            </tr>
+          %end
+          </table>
+    
+    </div>
+    
+      
+</div>
+  
+
+  

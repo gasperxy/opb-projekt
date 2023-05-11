@@ -30,6 +30,12 @@ class IzdelekDto:
 class KategorijaIzdelka:
     id: int = field(default=0)
     oznaka: str = field(default="")
+
+@dataclass
+class KategorijaIzdelkaDto:
+    id: int = field(default=0)
+    oznaka: str = field(default="")
+    st_izdelkov: int = field(default=0)
     
 @dataclass_json
 @dataclass
@@ -47,6 +53,19 @@ class CenaIzdelkaDto:
     izdelek_oznaka : str = field(default="")
     leto : str = field(default="")
     cena : float = field(default=0)
+
+@dataclass_json
+@dataclass
+class Uporabnik:
+    username: str = field(default="")
+    role: str = field(default="")
+    password_hash: str = field(default="")
+    last_login: str = field(default="")
+
+@dataclass
+class UporabnikDto:
+    username: str = field(default="")
+    role: str = field(default="")
 
 
 

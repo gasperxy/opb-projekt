@@ -2,13 +2,15 @@
 # -*- encoding: utf-8 -*-
 
 # uvozimo bottle.py
-from bottleext import get, post, run, request, template, redirect, static_file, url
+from bottleext import get, post, run, request, template, redirect, static_file, url, response, template_user
+
 
 # uvozimo ustrezne podatke za povezavo
 
 from Data.Database import Repo
 from Data.Modeli import *
-
+from Data.Services import AuthService
+from functools import wraps
 
 import os
 
@@ -21,20 +23,144 @@ DB_PORT = os.environ.get('POSTGRES_PORT', 5432)
 # debug(True)
 
 repo = Repo()
+auth = AuthService(repo)
+
+def cookie_required(f):
+    """
+    Dekorator, ki zahteva veljaven piškotek. Če piškotka ni, uporabnika preusmeri na stran za prijavo.
+    """
+    @wraps(f)
+    def decorated( *args, **kwargs):
+        
+           
+        cookie = request.get_cookie("uporabnik")
+        if cookie:
+            return f(*args, **kwargs)
+        
+        return template("prijava.html", napaka="Potrebna je prijava!")
+
+     
+        
+        
+    return decorated
 
 @get('/static/<filename:path>')
 def static(filename):
     return static_file(filename, root='static')
 
+
+
 @get('/')
+@cookie_required
 def index():
+    """
+    Domača stran je stran z cenami izdelkov.
+    """
+
     izdelki = repo.cena_izdelkov()
-    return template('izdelki.html', izdelki=izdelki)
+        
+    return template_user('izdelki.html', skip=0, take=10, izdelki=izdelki)
+ 
+    
+@get('/izdelki/<skip:int>/<take:int>/')
+@cookie_required
+def izdelki(skip, take):    
+    
+    izdelki = repo.cena_izdelkov(skip=skip, take=take )
+    return template_user('izdelki.html',skip=skip, take=take, izdelki=izdelki)
+
+@get('/kategorije/<skip:int>/<take:int>/')
+@cookie_required
+def kategorije(skip, take):    
+    
+    kategorije = repo.kategorije_izdelkov(skip=skip, take=take )
+    return template_user('kategorije.html' ,skip=skip, take=take, kategorije=kategorije)
+    
+    
+    
+
+@post('/prijava')
+def prijava():
+    """
+    Prijavi uporabnika v aplikacijo. Če je prijava uspešna, ustvari piškotke o uporabniku in njegovi roli.
+    Drugače sporoči, da je prijava neuspešna.
+    """
+    username = request.forms.get('username')
+    password = request.forms.get('password')
+
+    if not auth.obstaja_uporabnik(username):
+        return template("prijava.html", napaka="Uporabnik s tem imenom ne obstaja")
+
+    prijava = auth.prijavi_uporabnika(username, password)
+    if prijava:
+        response.set_cookie("uporabnik", username)
+        response.set_cookie("rola", prijava.role)
+        
+        redirect(url('index'))
+        
+    else:
+        return template("prijava.html", napaka="Neuspešna prijava. Napačno geslo ali uporabniško ime.")
+    
+@get('/odjava')
+def odjava():
+    """
+    Odjavi uporabnika iz aplikacije. Pobriše piškotke o uporabniku in njegovi roli.
+    """
+    
+    response.delete_cookie("uporabnik")
+    response.delete_cookie("rola")
+    
+    return template('prijava.html', napaka=None)
+
+
+
+   
 
 @get('/dodaj_izdelek')
 def dodaj_izdelek():
+
+    # dobimo seznam kategorij (predpostavljamo, da bo 1000 kategorj zadostovalo :))
+    kategorije = repo.dobi_gen(KategorijaIzdelka, 1000, 0)
     
-    return template('dodaj_izdelek.html', izdelek = CenaIzdelkaDto())
+    # vrnemo template za dodajanje izdelka
+    return template_user('dodaj_izdelek.html', izdelek = CenaIzdelkaDto(), kategorije=kategorije)
+
+@post('/dodaj_izdelek')
+def dodaj_izdelek_post():
+
+    kategorija_id = int(request.forms.get('kategorija'))
+    ime = str(request.forms.get('ime'))
+    leto = request.forms.get('leto')
+    cena = float(request.forms.get('cena'))
+
+    izdelek = repo.dodaj_izdelek(Izdelek(
+        ime=ime,
+        kategorija=kategorija_id
+    ))
+
+    cena_izdelka = repo.dodaj_ceno_izdelka(CenaIzdelka(
+        izdelek_id=izdelek.id,
+        leto=leto,
+        cena=cena
+    ))
+
+    
+    
+    redirect(url('izdelki', skip=0, take=10))
+@get('/dodaj_kategorijo')
+def dodaj_kategorijo():
+    
+    return template_user('dodaj_kategorijo.html', kategorija = KategorijaIzdelka())
+
+@post('/dodaj_kategorijo')
+def dodaj_kategorijo_post():
+    oznaka = request.forms.get("kategorija")
+
+    repo.dodaj_gen(KategorijaIzdelka(oznaka=oznaka))
+    redirect(url('kategorije', skip=0, take=100))
+
+
+
 
 
 ######################################################################
