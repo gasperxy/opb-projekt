@@ -36,6 +36,11 @@ class KategorijaIzdelkaDto:
     id: int = field(default=0)
     oznaka: str = field(default="")
     st_izdelkov: int = field(default=0)
+
+@dataclass
+class Leto:
+    leto: str = field(default="")
+    izbrano: bool = field(default=False)
     
 @dataclass_json
 @dataclass

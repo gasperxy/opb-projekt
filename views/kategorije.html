@@ -10,13 +10,18 @@
       %end
 
     </br>
-    <div style="height: 500px; overflow: auto;" >
-        <table  id="kategorije" class="table table-bordered">
+    <div class="form-group pull-right">
+      <input type="text" class="search form-control" placeholder="Išči">
+  </div>
+    <div style="height: 500px; overflow: auto; border: 1px solid #ddd;" >
+        <table  id="kategorije" class="table table-bordered searchtbl">
             <thead>
                 <tr>
                     <th>Kategorija</th>
                     <th>Število izdelkov</th>
                  </tr>
+
+                 
             </thead>
          
           %for kategorija in kategorije:
@@ -30,7 +35,6 @@
           </table>
     
     </div>
-    
       
 </div>
   

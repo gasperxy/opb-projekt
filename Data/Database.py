@@ -60,6 +60,18 @@ class Repo:
     
         return typ.from_dict(d)
     
+    def izbrisi_gen(self,  typ: Type[T], id: int | str, id_col = "id"):
+        """
+        Generična metoda, ki vrne dataclass objekt pridobljen iz baze na podlagi njegovega idja.
+        """
+        tbl_name = typ.__name__
+        sql_cmd = f'Delete  FROM {tbl_name} WHERE {id_col} = %s';
+        self.cur.execute(sql_cmd, (id,))
+        self.conn.commit()
+
+       
+
+    
     def dodaj_gen(self, typ: T, serial_col="id", auto_commit=True):
         """
         Generična metoda, ki v bazo doda entiteto/objekt. V kolikor imamo definiram serial
@@ -279,19 +291,35 @@ class Repo:
 
         return [IzdelekDto(id, ime, oznaka) for (id, ime, oznaka) in izdelki]
     
-    def cena_izdelkov(self, skip: int = 0, take: int = 10) -> List[CenaIzdelkaDto]:
+    def cena_izdelkov(self, skip: int = 0, take: int = 10, leta: List[Leto] = []) -> List[CenaIzdelkaDto]:
 
-        
-        self.cur.execute(
-            f"""
-            select c.id, i.id as izdelek_id, i.ime, k.oznaka, c.leto, c.cena from cenaizdelka c
-                left join izdelek i on i.id = c.izdelek_id
-                left join kategorijaizdelka k on k.id = i.kategorija
+        if leta:
+            # V poizvedbi mormao uporabit še in stavek, da določimo le izbrana leta
 
-            limit {take}
-            offset {skip};
-           
-             """
+            sql_query = self.cur.mogrify(f"""
+                select c.id, i.id as izdelek_id, i.ime, k.oznaka, date_part('year', c.leto)::TEXT as leto, c.cena from cenaizdelka c
+                    left join izdelek i on i.id = c.izdelek_id
+                    left join kategorijaizdelka k on k.id = i.kategorija
+                where date_part('year', c.leto)::TEXT in %s
+                limit {take}
+                offset {skip};
+                """, (tuple([leto.leto for leto in leta if leto.izbrano]),) )
+            self.cur.execute(sql_query)
+                
+            
+                
+
+        else:
+            self.cur.execute(
+                f"""
+                select c.id, i.id as izdelek_id, i.ime, k.oznaka, date_part('year', c.leto)::TEXT as leto, c.cena from cenaizdelka c
+                    left join izdelek i on i.id = c.izdelek_id
+                    left join kategorijaizdelka k on k.id = i.kategorija
+
+                limit {take}
+                offset {skip};
+            
+                """
         )
 
         return [CenaIzdelkaDto(id, izdelek_id, ime, oznaka, leto, cena) for (id, izdelek_id, ime, oznaka, leto, cena) in self.cur.fetchall()]
@@ -310,6 +338,18 @@ class Repo:
         )
 
         return [KategorijaIzdelkaDto(id, oznaka, st_izdelkov) for (id, oznaka, st_izdelkov) in self.cur.fetchall()]
+    
+    def dobi_leta(self) -> List[Leto]:
+        self.cur.execute(
+            """
+            select distinct date_part('year', leto)::TEXT as leto from cenaizdelka
+            order by date_part('year', leto)::TEXT asc;
+            """
+        )
+        
+
+
+        return [Leto(leto, True) for (leto,) in self.cur.fetchall()]
 
     def dobi_izdelek(self, ime_izdelka: str) -> Izdelek:
         # Preverimo, če izdelek že obstaja

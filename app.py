@@ -31,12 +31,9 @@ def cookie_required(f):
     """
     @wraps(f)
     def decorated( *args, **kwargs):
-        
-           
         cookie = request.get_cookie("uporabnik")
         if cookie:
             return f(*args, **kwargs)
-        
         return template("prijava.html", napaka="Potrebna je prijava!")
 
      
@@ -57,17 +54,39 @@ def index():
     Domača stran je stran z cenami izdelkov.
     """
 
-    izdelki = repo.cena_izdelkov()
+    
+    leta = repo.dobi_leta()
+    izdelki = repo.cena_izdelkov(take=10000, leta=leta)
+
+   
         
-    return template_user('izdelki.html', skip=0, take=10, izdelki=izdelki)
+    return template_user('izdelki.html', izdelki=izdelki, leta=leta)
  
     
-@get('/izdelki/<skip:int>/<take:int>/')
+@get('/izdelki/')
 @cookie_required
-def izdelki(skip, take):    
+def izdelki():    
     
-    izdelki = repo.cena_izdelkov(skip=skip, take=take )
-    return template_user('izdelki.html',skip=skip, take=take, izdelki=izdelki)
+    izdelki = repo.cena_izdelkov(take=10000 )
+    leta = repo.dobi_leta()
+    return template_user('izdelki.html',izdelki=izdelki, leta=leta)
+
+@post('/izdelki/')
+@cookie_required
+def izdelki_filter():    
+    
+    
+    leta = repo.dobi_leta()    
+
+    # Preverimo katera leta imamo označena
+    for leto in leta:
+        izbrano = request.forms.get(leto.leto)
+        if izbrano is None:
+            leto.izbrano = False
+    take = 10000
+    izdelki = repo.cena_izdelkov(take=take, leta = leta )
+
+    return template_user('izdelki.html', izdelki=izdelki, leta=leta)
 
 @get('/kategorije/<skip:int>/<take:int>/')
 @cookie_required
@@ -75,6 +94,16 @@ def kategorije(skip, take):
     
     kategorije = repo.kategorije_izdelkov(skip=skip, take=take )
     return template_user('kategorije.html' ,skip=skip, take=take, kategorije=kategorije)
+
+@get('/izbrisi_izdelek/<id:int>/')
+@cookie_required
+def izbrisi_izdelek(id):    
+    
+    repo.izbrisi_gen(CenaIzdelka, id)
+    izdelki = repo.cena_izdelkov(take=10000)
+    leta = repo.dobi_leta()
+    return template_user('izdelki.html',izdelki=izdelki, leta=leta)
+   
     
     
     
@@ -146,7 +175,7 @@ def dodaj_izdelek_post():
 
     
     
-    redirect(url('izdelki', skip=0, take=10))
+    redirect(url('izdelki'))
 @get('/dodaj_kategorijo')
 def dodaj_kategorijo():
     

@@ -1,6 +1,6 @@
 %rebase('osnova.html', naslov='Cene izdelkov po kategorijah in letih', stran='izdelki')
 
-<div style="width: 85%; margin-left: 5%; margin-right: 5%;">
+<div >
 
     <a  href="{{url('dodaj_izdelek')}}" class="btn btn-light">
        Dodaj nov izdelek
@@ -10,13 +10,23 @@
      
 
     </br>
-    <table  id="izdelki" class="table table-bordered">
+    <div style="display: flex;">
+    <div style="flex:1;">
+      <table 
+      data-toggle="table" 
+      data-sticky-header="true" 
+      data-search="true"
+      data-show-columns="true" 
+      data-sortable="true"
+      id="izdelki" 
+      data-height="500" >
         <thead>
             <tr>
                 <th>Kategorija</th>
                 <th>Izdelek</th>
                 <th>Leto</th>
                 <th>Cena</th>  
+                <th>Akcija</th>  
              </tr>
         </thead>
      
@@ -26,18 +36,47 @@
            <td>{{izdelek.izdelek_oznaka}}</td>
            <td>{{izdelek.leto}}</td>
            <td>{{izdelek.cena}}</td>
+           <td>
+            <a href="{{url('izbrisi_izdelek', id=izdelek.id)}}"> izbriši</a>
+           </td>
      
         </tr>
       %end
       </table>
 
-      <nav aria-label="Page navigation example">
-        <ul class="pagination">
-          <li class="page-item"><a class="page-link" href="#">Previous</a></li>
-          <li class="page-item"><a class="page-link" href="{{url('izdelki', skip=skip+take, take = take)}}">Next</a></li>
-        </ul>
-      </nav>
+
+    </div>
+     
+
+      <div style="width:fit-content; margin-left: 20px;">
+        <b>Kriteriji iskanja:</b>
+        <form action="{{url('izdelki')}}" method="POST">
+          <hr>
+          %for leto in leta:
+          <div class="form-check">
+
+            %if leto.izbrano: 
+            <input class="form-check-input" type="checkbox" value="" name="{{leto.leto}}" id="{{leto.leto}}" checked> 
+            %else:
+              <input class="form-check-input" type="checkbox" value="" name="{{leto.leto}}" id="{{leto.leto}}">
+            %end
+           
+            <label class="form-check-label" for="defaultCheck1">
+              {{leto.leto}}
+            </label>
+          </div>
+          %end
+
+          <hr>
+          <button type="submit" class="btn btn-light">Uporabi</button>
+        </form>
+      
+      </div>
+    </div>
+   
 </div>
+
+
   
 
   
