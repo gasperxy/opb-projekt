@@ -34,7 +34,7 @@ def cookie_required(f):
         cookie = request.get_cookie("uporabnik")
         if cookie:
             return f(*args, **kwargs)
-        return template("prijava.html", napaka="Potrebna je prijava!")
+        return template("prijava.html",uporabnik=None, rola=None, napaka="Potrebna je prijava!")
 
      
         
@@ -125,10 +125,17 @@ def prijava():
         response.set_cookie("uporabnik", username)
         response.set_cookie("rola", prijava.role)
         
-        redirect(url('index'))
+        # redirect v večino primerov izgleda ne deluje
+        # redirect(url('index'))
+
+        # Uporabimo kar template, kot v sami "index" funkciji
+
+        leta = repo.dobi_leta()
+        izdelki = repo.cena_izdelkov(take=10000, leta=leta)
+        return template('izdelki.html', izdelki=izdelki, leta=leta, uporabnik=username, rola=prijava.role)
         
     else:
-        return template("prijava.html", napaka="Neuspešna prijava. Napačno geslo ali uporabniško ime.")
+        return template("prijava.html", uporabnik=None, rola=None, napaka="Neuspešna prijava. Napačno geslo ali uporabniško ime.")
     
 @get('/odjava')
 def odjava():
@@ -139,7 +146,7 @@ def odjava():
     response.delete_cookie("uporabnik")
     response.delete_cookie("rola")
     
-    return template('prijava.html', napaka=None)
+    return template('prijava.html', uporabnik=None, rola=None, napaka=None)
 
 
 

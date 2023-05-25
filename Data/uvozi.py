@@ -90,6 +90,36 @@ def uvozi_csv(pot, ime):
 
 
 
+def uvozi_opsi(pot, ime):
+    """
+    Uvozimo csv v bazo brez večjih posegov v podatke.
+    Ustvarimo pandasov DataFrame ter nato z generično metodo ustvarimo ter
+    napolnimo tabelo v postgresql bazi.
+    """
+    df = pd.read_csv(pot, sep=",", encoding='utf-16le')
+
+    
+    # Vzamemo le prvih 500000 vrstic (zardi hitrosti inserta, itd.)
+    df = df.iloc[:500000]   
+
+    # Naredimo tabelo z dodatnim serial primary key stolpcem
+    repo.df_to_sql_create(df, ime, add_serial=True, use_camel_case=True)
+
+    # uvozimo podatke v to isto tabelo
+    repo.df_to_sql_insert(df, ime, use_camel_case=True)
+
+
+
+# Uvozimo csv, ki ima kar veliko vrstic (za testiranje izdelave indexov)
+pot_opsi = "/Users/gasper/Documents/fmf/opbpodatki/opsiprs.csv"
+
+uvozi_opsi(pot_opsi, "podjetja")
+
+
+
+
+
+
 
 # Primeri uporabe. Zakomentiraj določene vrstice, če jih ne želiš izvajat!
     
