@@ -2,6 +2,7 @@
 import psycopg2, psycopg2.extensions, psycopg2.extras
 psycopg2.extensions.register_type(psycopg2.extensions.UNICODE) # se znebimo problemov s šumniki
 
+import os
 from typing import List, TypeVar, Type, Callable, Any
 from Data.Modeli import *
 from pandas import DataFrame
@@ -15,7 +16,7 @@ import dataclasses
 # kot njene vrednosti. Ko dodamo novo entiteno, jo moramo dodati tudi v to spremenljivko.
 
 
-
+DB_PORT = os.environ.get('POSTGRES_PORT', 5432)
 
 T = TypeVar(
     "T",
@@ -29,7 +30,7 @@ class Repo:
 
     def __init__(self):
         
-        self.conn = psycopg2.connect(database=auth.db, host=auth.host, user=auth.user, password=auth.password, port=5432)
+        self.conn = psycopg2.connect(database=auth.db, host=auth.host, user=auth.user, password=auth.password, port=DB_PORT)
         self.cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
 
